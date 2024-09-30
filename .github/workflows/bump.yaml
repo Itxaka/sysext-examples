@@ -1,9 +1,9 @@
-name: "Autobumps versions"
+name: "Autobump versions"
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 22 * * *"
+    - cron: "0 23 * * *"
 
 jobs:
   bump_version:
