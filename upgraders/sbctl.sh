@@ -34,8 +34,8 @@ createDirs
 curl -fsSL "${URL}"| tar xzf - --strip-components=1 -C usr/local/bin/
 # cleanup
 rm usr/local/bin/LICENSE
-rmdir /usr/local/lib # no systemd services here
 createExtensionRelease sbctl-"$latest_version" false
+find . -type d -empty -delete
 popd > /dev/null || exit 1
 mv sbctl-"$latest_version" ../
 printf "${GREEN}Done\n"

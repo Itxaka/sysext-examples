@@ -42,6 +42,7 @@ mv "$tmpDir"/tailscaled usr/local/sbin
 rm -Rf "$tmpDir"
 cp ../services/tailscaled.* usr/local/lib/systemd/system/
 createExtensionRelease tailscale-"$latest_version" false
+find . -type d -empty -delete
 popd > /dev/null || exit 1
 mv tailscale-"$latest_version" ../
 printf "${GREEN}Done\n"
