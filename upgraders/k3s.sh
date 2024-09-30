@@ -24,7 +24,7 @@ fi
 if [ -d ../k3s-"$latest_version" ]; then
   if [ "$FORCE" == "false" ];then
     printf "${RED}Version already exists\n"
-    exit 1
+    exit 0
   fi
   printf "${YELLOW}Version exists but FORCE was set, removing existing version\n"
   rm -Rf ../k3s-"$latest_version"
