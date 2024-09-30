@@ -16,10 +16,7 @@ permissions:
   contents: write
   pull-requests: write
 
-env:
-  REPOSITORY: quay.io/itxaka/sysext
-  PUSH: true
-  KEEP_FILES: false
+
 
 jobs:
   bump_version:
@@ -36,5 +33,9 @@ jobs:
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
       - uses: actions/checkout@v4
       - name: Run updater script for ${{ matrix.item }}
+        env:
+          REPOSITORY: quay.io/itxaka/${{ matrix.item }}
+          PUSH: true
+          KEEP_FILES: false
         run: |
           ./${{ matrix.item }}.sh
