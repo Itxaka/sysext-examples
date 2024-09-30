@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+REPOSITORY=${REPOSITORY:-"ttl.sh"}
+PUSH=${PUSH:-"false"}
 
 for dir in */; do
   name=$(echo "${dir%/}" | cut -d'-' -f1)
@@ -16,7 +18,10 @@ for dir in */; do
 FROM scratch
 COPY * /
 EOF
-  docker build -t "$name":"$docker_version" .
+  docker build -t "$REPOSITORY"/"$name":"$docker_version" .
   rm Dockerfile
+  if [ "$PUSH" = "true" ]; then
+      docker push "$REPOSITORY"/"$name":"$docker_version"
+  fi
   popd || exit 1
 done
