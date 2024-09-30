@@ -16,7 +16,7 @@ for dir in */; do
   pushd "$dir" || exit 1
   cat <<EOF > Dockerfile
 FROM scratch
-COPY * /
+COPY . /
 EOF
   docker build -t "$REPOSITORY"/"$name":"$docker_version" .
   rm Dockerfile
