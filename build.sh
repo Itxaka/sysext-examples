@@ -4,6 +4,9 @@ REPOSITORY=${REPOSITORY:-"ttl.sh"}
 PUSH=${PUSH:-"false"}
 
 for dir in */; do
+  if [ ! -d "usr/" ]; then
+      echo "$dir doesnt look like a sysextension, skipping"
+  fi
   name=$(echo "${dir%/}" | cut -d'-' -f1)
   version=$(echo "${dir%/}" | cut -d'-' -f2)
   if [ -z "$version" ]; then
