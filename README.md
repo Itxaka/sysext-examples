@@ -62,7 +62,6 @@ And that would generate a sysext in the current dir signed with our keys and rea
 
 This is the easiest way as it doesnt require pushing the image anywhere or pulling it, it just uses the generated files
 
-```dockerfile
 ```bash
 $ KEEP_FILES=yes ./k3s.sh
 Using version v1.31.1+k3s1
