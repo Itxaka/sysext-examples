@@ -1,0 +1,24 @@
+name: "Autobumps versions"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 22 * * *"
+
+jobs:
+  bump_version:
+    runs_on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ["k3s", "sbctl", "tailscale"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run updater script for ${{ matrix.item }}
+        run: |
+          cd upgraders && ./${{ matrix.item }}.sh
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          signoff: true
+          title: New version of ${{ matrix.item }}
+          branch: create-pull-request/patch-${{ matrix.item }}
