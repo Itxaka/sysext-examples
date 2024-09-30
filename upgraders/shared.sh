@@ -6,6 +6,7 @@ YELLOW='\033[0;33m'
 
 createDirs() {
     mkdir -p usr/local/bin
+    mkdir -p usr/local/sbin
     mkdir -p usr/local/lib/systemd/system/
     mkdir -p usr/lib/extension-release.d/
 }
