@@ -1,5 +1,9 @@
 name: "Build images"
 
+concurrency:
+  group: ci-build-${{ github.head_ref || github.ref }}-${{ github.repository }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:

@@ -1,5 +1,9 @@
 name: "Autobump versions"
 
+concurrency:
+  group: ci-autobump-${{ github.head_ref || github.ref }}-${{ github.repository }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   schedule:
