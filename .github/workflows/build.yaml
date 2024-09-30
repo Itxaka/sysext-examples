@@ -1,21 +1,29 @@
-name: "Build images"
+name: "Build and push versions"
 
 concurrency:
-  group: ci-build-${{ github.head_ref || github.ref }}-${{ github.repository }}
+  group: ci-release-${{ github.head_ref || github.ref }}-${{ github.repository }}
   cancel-in-progress: true
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
   schedule:
-    - cron: "0 23 * * *"
+    - cron: "0 15 * * *"
 
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  build:
+  bump_version:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ["k3s", "sbctl", "tailscale"]
     steps:
       - uses: actions/checkout@v4
-      - run: PUSH=true ./build.sh
+      - name: Run updater script for ${{ matrix.item }}
+        run: |
+          PUSH=true ./${{ matrix.item }}.sh

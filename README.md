@@ -1,60 +1,89 @@
-Sysext examples
+This repo will generate latest docker images of k3s,tailscale and sbctl wtih only the components ready to be consumed as sysextensions ready for builder.
+
+This can be used either with [enki](https://github.com/kairos-io/enki) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension
 
 
-### Introduction
 
-System extensions are a way to extend the system with additional files and directories that are mounted at boot time. System extension images may – dynamically at runtime — extend the /usr/ directory hierarchies with additional files. This is particularly useful on immutable system images where a /usr/ hierarchy residing on a read-only file system shall be extended temporarily at runtime without making any persistent modifications.
+# Using this repo
+
+You can see the env vars that can be set when building the images under the shared.sh file:
+
+ - `REPOSITORY`: repository to prepend the images tags with
+ - `PUSH`: whether to push the images after building them or not
+ - `KEEP_FILES`: whether to keep the files after building and pushing the image. This can be used with `PUSH=false` to just build the local files and a local image. This would leave a dir with the NAME-VERSION in the root of the repo ready to be used with `systemd-repart`
+ - `FORCE`: whether to force the build of the files. Normally if the script sees the directory already created, it wont proceed further as it assumes that the sysext files were already generated. This var makes it so the dir is removed and recreated from scratch. Useful if the script failed and leaved files around or the download of artifacts broke and you want to redo the process.
+ - `K3S_VERSION`: k3s version to build. This defaults to the latest available if not set.
+ - `SBCTL_VERSION`: sbctl version to build. This defaults to the latest available if not set.
+ - `TAILSCALE_VERSION`: tailscale version to build. This defaults to the latest available if not set.
 
 
-### Building system extensions
+It has three modes of operation:
+ - `KEEP_FILES=true` and `PUSH=false`: This is the default method. It will generate the files locally but not build the docker image nor push it.
+ - `KEEP_FILES=true` and `PUSH=true`: This will keep the files and also build the docker image and push it.
+ - `KEEP_FILES=false` and `PUSH=true`: This will generate only the ocker image na dpush it, not leaving anything around.
 
-To build a system extension, you need to create a directory with the files you want to add to the system. Then you can use the `systemd-repart` tool to create a system extension image which is signed and verity protected.
+Notice that having `KEEP_FILES=false` and `PUSH=false` will not do anything and exit early.
+
+# Using the generated OCI images with enki
+
 
 ```bash
-$ systemd-repart -S -s SOURCE_DIR NAME.sysext.raw --private-key=PRIVATE_KEY --certificate=CERTIFICATE       
+$ enki sysext NAME CONTAINER_IMAGE --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE
 ```
 
-Note that the NAME has to match the name of the extension release. Check `k3s/v1.29.2+k3s1/usr/lib/extension-release.d/extension-release.k3s-v1.29.2+k3s1` to see the anme that the extension would need to have `k3s-v1.29.2+k3s1` in this case.
-
-
-### Building the examples
+So for example, if we pushed the sbctl:0.15.4 image to ttl.sh, we could run:
 
 ```bash
-$ systemd-repart -S -s k3s/v1.29.2+k3s1/ k3s-v1.29.2+k3s1.sysext.raw --private-key=PRIVATE_KEY --certificate=CERTIFICATE    
+$ enki sysext svctl-0.15.4 ttl.sh/sbctl:0.15.4 --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE
 ```
 
+And that would generate a sysext in the current dir signed with our keys and ready for consumption.
+
+
+
+# Using the generated OCI images with luet + systemd-repart
+
+
+We would first unpack the artifact with luet to get the plain artifacts inside the image
+
 ```bash
-$ systemd-repart -S -s sbctl/0.14/ sbctl-0.14.sysext.raw --private-key=PRIVATE_KEY --certificate=CERTIFICATE    
+luet util unpack ttl.sh/sbctl:0.15.4 /tmp/sbctl-0.15.4
 ```
 
-### Verifying the sysextensions
-
-You can use `systemd-dissect` to verify the sysextensions, the ID, ARCHITECTURE and the partitions that are included in the sysextension.
+Then use systemd-repart to generate a signed sysextension:
 
 ```bash
-$ sudo systemd-dissect sbctl-0.14.sysext.raw
-      Name: sbctl-0.14.sysext.raw
-      Size: 21.0M
- Sec. Size: 512
-     Arch.: x86-64
+$ systemd-repart -S -s /tmp/sbctl-0.15.4 sbctl-0.15.4.sysext.raw --private-key=PRIVATE_KEY --certificate=CERTIFICATE
+```
 
-Image UUID: 351f0e17-35e5-42ff-bf09-8db65c756f7b
- sysext R.: ID=_any
-            ARCHITECTURE=x86-64
+And that would generate a sysext in the current dir signed with our keys and ready for consumption.
 
-    Use As: ✗ bootable system for UEFI
-            ✗ bootable system for container
-            ✗ portable service
-            ✗ initrd
-            ✓ sysext for system
-            ✓ sysext for portable service
-            ✗ sysext for initrd
-            ✗ confext for system
-            ✗ confext for portable service
-            ✗ confext for initrd
+# Using the generated dirs with systemd-repart
 
-RW DESIGNATOR      PARTITION UUID                       PARTITION LABEL        FSTYPE                AR>
-ro root            4afae1e5-c73c-2f5a-acdc-3655ed91d4e0 root-x86-64            erofs                 x8>
-ro root-verity     abea5f2f-214d-4d9f-83f8-ee69ca7614ba root-x86-64-verity     DM_verity_hash        x8>
-ro root-verity-sig bdb3ee65-ed86-480c-a750-93015254f1a7 root-x86-64-verity-sig verity_hash_signature x8>
+This is the easiest way as it doesnt require pushing the image anywhere or pulling it, it just uses the generated files
+
+```dockerfile
+```bash
+$ KEEP_FILES=yes ./k3s.sh
+Using version v1.31.1+k3s1
+Downloading k3s
+Creating symlinks
+Copying service files
+Creating extension.release.k3s-v1.31.1+k3s1 file with reload: true
+[+] Building 0.3s (5/5) FINISHED                                                         docker:default
+ => [internal] load build definition from Dockerfile                                               0.0s
+ => => transferring dockerfile: 59B                                                                0.0s
+ => [internal] load .dockerignore                                                                  0.0s
+ => => transferring context: 51B                                                                   0.0s
+ => [internal] load build context                                                                  0.2s
+ => => transferring context: 68.36MB                                                               0.2s
+ => CACHED [1/1] COPY . /                                                                          0.0s
+ => exporting to image                                                                             0.0s
+ => => exporting layers                                                                            0.0s
+ => => writing image sha256:2dca5ee0924a0fa77b6009c7d98b0dd1add9717da60fd375a8d4bad94bc5d1ea       0.0s
+ => => naming to ttl.sh/k3s:v1.31.1_k3s1                                                           0.0s
+Done
+
+$ systemd-repart -S -s  --private-key=PRIVATE_KEY --certificate=CERTIFICATE
+```
 ```
