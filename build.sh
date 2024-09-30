@@ -14,12 +14,16 @@ for dir in */; do
   # Ensure it's lowercase
   docker_version=$(echo "$docker_version" | tr '[:upper:]' '[:lower:]')
   pushd "$dir" || exit 1
+  cat <<EOF > .dockerignore
+Dockerfile
+EOF
   cat <<EOF > Dockerfile
 FROM scratch
 COPY . /
 EOF
   docker build -t "$REPOSITORY"/"$name":"$docker_version" .
   rm Dockerfile
+  rm .dockerignore
   if [ "$PUSH" = "true" ]; then
       docker push "$REPOSITORY"/"$name":"$docker_version"
   fi
