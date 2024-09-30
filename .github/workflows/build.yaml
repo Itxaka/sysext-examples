@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run updater script for ${{ matrix.item }}
         env:
-          REPOSITORY: quay.io/itxaka/${{ matrix.item }}
+          REPOSITORY: quay.io/itxaka/
           PUSH: true
           KEEP_FILES: false
         run: |
