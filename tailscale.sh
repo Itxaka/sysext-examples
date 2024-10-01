@@ -40,7 +40,7 @@ mv "$tmpDir"/tailscale usr/local/sbin
 mv "$tmpDir"/tailscaled usr/local/sbin
 rm -Rf "$tmpDir"
 cp ../services/tailscaled.* usr/local/lib/systemd/system/
-createExtensionRelease tailscale-"$latest_version" false
+createExtensionRelease tailscale-"$latest_version" true
 find . -type d -empty -delete
 popd > /dev/null || exit 1
 if [ "${PUSH}" != false ]; then
