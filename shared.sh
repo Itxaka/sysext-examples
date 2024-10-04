@@ -9,6 +9,7 @@ FORCE=${FORCE:-false}
 K3S_VERSION=${K3S_VERSION:-}
 SBCTL_VERSION=${SBCTL_VERSION:-}
 TAILSCALE_VERSION=${TAILSCALE_VERSION:-}
+HELM_VERSION=${HELM_VERSION:-}
 
 if [[ "${KEEP_FILES}" == "false" && "${PUSH}" == "false" ]]; then
   printf "${RED}Both KEEP_FILES and PUSH are set to false. Please choose one or the other.\n"
