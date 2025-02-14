@@ -15,6 +15,9 @@ K9S_VERSION=${K9S_VERSION:-}
 HABITAT_VERSION=${HABITAT_VERSION:-}
 PULUMI_ESC_VERSION=${PULUMI_ESC_VERSION:-}
 
+
+set -e
+
 if [[ "${KEEP_FILES}" == "false" && "${PUSH}" == "false" ]]; then
   printf "${RED}Both KEEP_FILES and PUSH are set to false. Please choose one or the other.\n"
   exit 0

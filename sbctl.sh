@@ -11,7 +11,7 @@ fi
 
 printf "${GREEN}Using version %s\n" "$latest_version"
 
-URL=https://github.com/Foxboron/sbctl/releases/download/${latest_version}/sbctl-${latest_version}-linux-amd64.tar.gz
+URL=https://github.com/Foxboron/sbctl/releases/download/${latest_version}/sbctl-${latest_version}.tar.gz
 FORCE=${FORCE:-false}
 
 if [ -z "$latest_version" ];then
