@@ -1,6 +1,6 @@
-This repo will generate latest docker images of k3s, tailscale, nebula, and sbctl wtih only the components ready to be consumed as sysextensions ready for builder.
+This repo will generate latest docker images of k3s, tailscale, slack nebula, chef habitat, pulumi esc, and sbctl wtih only the components ready to be consumed as systemd-sysext ready for builder.
 
-This can be used either with [auroraboot](https://github.com/kairos-io/AuroraBoot) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension
+This can be used either with [auroraboot](https://github.com/kairos-io/AuroraBoot) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension.
 
 
 
@@ -11,17 +11,19 @@ You can see the env vars that can be set when building the images under the shar
  - `REPOSITORY`: repository to prepend the images tags with
  - `PUSH`: whether to push the images after building them or not
  - `KEEP_FILES`: whether to keep the files after building and pushing the image. This can be used with `PUSH=false` to just build the local files and a local image. This would leave a dir with the NAME-VERSION in the root of the repo ready to be used with `systemd-repart`
- - `FORCE`: whether to force the build of the files. Normally if the script sees the directory already created, it wont proceed further as it assumes that the sysext files were already generated. This var makes it so the dir is removed and recreated from scratch. Useful if the script failed and leaved files around or the download of artifacts broke and you want to redo the process.
+ - `FORCE`: whether to force the build of the files. Normally if the script sees the directory already created, it won't proceed further as it assumes that the sysext files were already generated. This var makes it so the dir is removed and recreated from scratch. Useful if the script failed and leaved files around or the download of artifacts broke and you want to redo the process.
  - `K3S_VERSION`: k3s version to build. This defaults to the latest available if not set.
  - `SBCTL_VERSION`: sbctl version to build. This defaults to the latest available if not set.
  - `TAILSCALE_VERSION`: tailscale version to build. This defaults to the latest available if not set.
  - `NEBULA_VERSION`: nebula version to build. This defaults to the latest available if not set.
-
+ - `PULUMI_ESC_VERSION`: Pulumi esc version to build. This defaults to the latest available if not set.
+ - `HABITAT_VERSION`: Chef Habitat version to build. This defaults to the latest available if not set.
+ - `HABITAT_CHANNEL`: Chef Habitat channel to build. This defaults to the stable if not set.
 
 It has three modes of operation:
  - `KEEP_FILES=true` and `PUSH=false`: This is the default method. It will generate the files locally but not build the docker image nor push it.
  - `KEEP_FILES=true` and `PUSH=true`: This will keep the files and also build the docker image and push it.
- - `KEEP_FILES=false` and `PUSH=true`: This will generate only the ocker image na dpush it, not leaving anything around.
+ - `KEEP_FILES=false` and `PUSH=true`: This will generate only the docker image and push it, not leaving anything around.
 
 Notice that having `KEEP_FILES=false` and `PUSH=false` will not do anything and exit early.
 
