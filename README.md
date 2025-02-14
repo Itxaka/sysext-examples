@@ -1,6 +1,6 @@
-This repo will generate latest docker images of k3s,tailscale and sbctl wtih only the components ready to be consumed as sysextensions ready for builder.
+This repo will generate latest docker images of k3s, tailscale, nebula, and sbctl wtih only the components ready to be consumed as sysextensions ready for builder.
 
-This can be used either with [enki](https://github.com/kairos-io/enki) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension
+This can be used either with [auroraboot](https://github.com/kairos-io/AuroraBoot) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension
 
 
 
@@ -15,6 +15,7 @@ You can see the env vars that can be set when building the images under the shar
  - `K3S_VERSION`: k3s version to build. This defaults to the latest available if not set.
  - `SBCTL_VERSION`: sbctl version to build. This defaults to the latest available if not set.
  - `TAILSCALE_VERSION`: tailscale version to build. This defaults to the latest available if not set.
+ - `NEBULA_VERSION`: nebula version to build. This defaults to the latest available if not set.
 
 
 It has three modes of operation:
@@ -24,17 +25,27 @@ It has three modes of operation:
 
 Notice that having `KEEP_FILES=false` and `PUSH=false` will not do anything and exit early.
 
-# Using the generated OCI images with enki
+# Using the generated OCI images with auroraboot
 
 
 ```bash
-$ enki sysext NAME CONTAINER_IMAGE --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE
+$ docker run \
+-v "$PWD"/keys:/keys \
+-v "$PWD":/build/ \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--rm \
+quay.io/kairos/auroraboot:latest sysext --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE --output=/build NAME CONTAINER_IMAGE
 ```
 
 So for example, if we pushed the sbctl:0.15.4 image to ttl.sh, we could run:
 
 ```bash
-$ enki sysext svctl-0.15.4 ttl.sh/sbctl:0.15.4 --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE
+$ docker run \
+-v "$PWD"/keys:/keys \
+-v "$PWD":/build/ \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--rm \
+quay.io/kairos/auroraboot:latest sysext --private-key=/keys/PRIVATE_KEY --certificate=/keys/CERTIFICATE --output=/build svctl-0.15.4 ttl.sh/sbctl:0.15.4
 ```
 
 And that would generate a sysext in the current dir signed with our keys and ready for consumption.
