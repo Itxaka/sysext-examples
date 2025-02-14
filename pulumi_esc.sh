@@ -18,19 +18,19 @@ if [ -z "$latest_version" ];then
   exit 1
 fi
 
-if [ -d pulumi-esc-"$latest_version" ]; then
+if [ -d pulumi_esc-"$latest_version" ]; then
   if [ "$FORCE" == "false" ];then
     printf "${RED}Version already exists\n"
     exit 0
   fi
   printf "${YELLOW}Version exists but FORCE was set, removing existing version\n"
-  rm -Rf ../pulumi-esc-"$latest_version"
+  rm -Rf ../pulumi_esc-"$latest_version"
 fi
 
-mkdir -p pulumi-esc-"$latest_version"
-pushd pulumi-esc-"$latest_version" > /dev/null || exit 1
+mkdir -p pulumi_esc-"$latest_version"
+pushd pulumi_esc-"$latest_version" > /dev/null || exit 1
 createDirs
-# pulumi-esc is compressed
+# pulumi_esc is compressed
 tmpDir=$(mktemp -d)
 curl -fsSL "${URL}"| tar xzf - --strip-components=1 -C "$tmpDir"
 # move files into proper dirs
@@ -38,17 +38,17 @@ mv "$tmpDir"/esc usr/local/sbin
 rm -Rf "$tmpDir"
 # Copy systemd service files if they exist.
 if [ -d ../services ]; then
-  if compgen -G "../services/pulumi-esc.*" > /dev/null; then
-    cp ../services/pulumi-esc.* usr/local/lib/systemd/system/
+  if compgen -G "../services/pulumi_esc.*" > /dev/null; then
+    cp ../services/pulumi_esc.* usr/local/lib/systemd/system/
   fi
 fi
-createExtensionRelease pulumi-esc-"$latest_version" true
+createExtensionRelease pulumi_esc-"$latest_version" true
 find . -type d -empty -delete
 popd > /dev/null || exit 1
 if [ "${PUSH}" != false ]; then
-  buildAndPush pulumi-esc-"$latest_version"
+  buildAndPush pulumi_esc-"$latest_version"
 fi
 if [ "${KEEP_FILES}" == "false" ];then
-  rm -Rf pulumi-esc-"$latest_version"
+  rm -Rf pulumi_esc-"$latest_version"
 fi
 printf "${GREEN}Done\n"
