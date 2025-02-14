@@ -1,0 +1,4 @@
+# Set the port to listen on for incoming VPN packets.
+# You might want to configure this in order to set external firewall
+# settings.
+PORT="4242"
