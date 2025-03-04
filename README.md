@@ -1,4 +1,4 @@
-This repo will generate latest docker images of k3s, tailscale, slack nebula, chef habitat, pulumi esc, and sbctl wtih only the components ready to be consumed as systemd-sysext ready for builder.
+This repo will generate latest docker images of k3s, tailscale, slack nebula, chef habitat, pulumi esc, incus, and sbctl wtih only the components ready to be consumed as systemd-sysext ready for builder.
 
 This can be used either with [auroraboot](https://github.com/kairos-io/AuroraBoot) to generate a signed sysext or manually by unpacking the image with [luet](https://luet.io/) and using systemd-repart to build a signed sysextension.
 

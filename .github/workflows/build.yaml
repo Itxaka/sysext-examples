@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        item: ["k3s", "sbctl", "tailscale", "helm", "k9s", "nebula", "pulumi_esc", "habitat"]
+        item: ["k3s", "sbctl", "tailscale", "helm", "k9s", "nebula", "pulumi_esc", "habitat", "incus"]
     steps:
       - name: Login to Quay.io
         uses: docker/login-action@v3
