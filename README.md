@@ -12,6 +12,7 @@ You can see the env vars that can be set when building the images under the shar
  - `PUSH`: whether to push the images after building them or not
  - `KEEP_FILES`: whether to keep the files after building and pushing the image. This can be used with `PUSH=false` to just build the local files and a local image. This would leave a dir with the NAME-VERSION in the root of the repo ready to be used with `systemd-repart`
  - `FORCE`: whether to force the build of the files. Normally if the script sees the directory already created, it won't proceed further as it assumes that the sysext files were already generated. This var makes it so the dir is removed and recreated from scratch. Useful if the script failed and leaved files around or the download of artifacts broke and you want to redo the process.
+ - `SKIP_VERIFY`: whether to skip signature verification if it fails. This is useful in environments where GPG verification might fail due to network issues or key server problems. Default is false.
  - `K3S_VERSION`: k3s version to build. This defaults to the latest available if not set.
  - `SBCTL_VERSION`: sbctl version to build. This defaults to the latest available if not set.
  - `TAILSCALE_VERSION`: tailscale version to build. This defaults to the latest available if not set.

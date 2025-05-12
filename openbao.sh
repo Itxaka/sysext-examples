@@ -13,7 +13,7 @@ printf "${GREEN}Using version %s\n" "$latest_version"
 # Remove the 'v' prefix for the file name
 version_no_v=${latest_version#v}
 URL=https://github.com/openbao/openbao/releases/download/${latest_version}/bao_${version_no_v}_Linux_x86_64.tar.gz
-SIG_URL=https://github.com/openbao/openbao/releases/download/${latest_version}/bao_${version_no_v}_Linux_x86_64.tar.gz.sig
+SIG_URL=https://github.com/openbao/openbao/releases/download/${latest_version}/bao_${version_no_v}_Linux_x86_64.tar.gz.gpgsig
 
 FORCE=${FORCE:-false}
 
@@ -38,21 +38,43 @@ createDirs
 printf "${GREEN}Downloading OpenBao and signature\n"
 tmpDir=$(mktemp -d)
 curl -fsSL "${URL}" -o "$tmpDir/openbao.tar.gz"
-curl -fsSL "${SIG_URL}" -o "$tmpDir/openbao.tar.gz.sig"
+curl -fsSL "${SIG_URL}" -o "$tmpDir/openbao.tar.gz.gpgsig"
 
-# Verify signature if gpg is available
-if command -v gpg &> /dev/null; then
+# Check if the signature file is empty or invalid
+if [ ! -s "$tmpDir/openbao.tar.gz.gpgsig" ]; then
+  printf "${YELLOW}Signature file is empty or could not be downloaded\n"
+  if [ "${SKIP_VERIFY:-false}" == "true" ]; then
+    printf "${YELLOW}SKIP_VERIFY is set, continuing without verification\n"
+  else
+    printf "${RED}Signature verification failed - empty signature file\n"
+    exit 1
+  fi
+fi
+
+# Verify signature if gpg is available and we have a valid signature file
+if [ -s "$tmpDir/openbao.tar.gz.gpgsig" ] && command -v gpg &> /dev/null; then
   printf "${GREEN}Verifying signature\n"
-  # Import OpenBao GPG key if needed
-  # Note: In a production environment, you should verify the key fingerprint
-  gpg --keyserver keyserver.ubuntu.com --recv-keys 0x6A2D74F1986F7CAB || true
-  
-  if gpg --verify "$tmpDir/openbao.tar.gz.sig" "$tmpDir/openbao.tar.gz"; then
+
+  # Download and import the OpenBao GPG key
+  # Primary key fingerprint: 66D1 5FDD 8728 7219 C8E1 5478 D200 CD70 2853 E6D0
+  # Subkey fingerprint: E617 DCD4 065C 2AFC 0B2C F7A7 BA8B C08C 0F69 1F94
+  curl -fsSL "https://openbao.org/assets/openbao-gpg-pub-20240618.asc" -o "$tmpDir/openbao-gpg-pub.asc"
+  gpg --import "$tmpDir/openbao-gpg-pub.asc" || true
+
+  if gpg --verify "$tmpDir/openbao.tar.gz.gpgsig" "$tmpDir/openbao.tar.gz"; then
     printf "${GREEN}Signature verification successful\n"
   else
     printf "${RED}Signature verification failed\n"
-    exit 1
+    # If verification fails but SKIP_VERIFY is set, continue anyway
+    if [ "${SKIP_VERIFY:-false}" == "true" ]; then
+      printf "${YELLOW}SKIP_VERIFY is set, continuing despite verification failure\n"
+    else
+      exit 1
+    fi
   fi
+elif [ ! -s "$tmpDir/openbao.tar.gz.gpgsig" ]; then
+  # Already handled above
+  :
 else
   printf "${YELLOW}GPG not available, skipping signature verification\n"
 fi
