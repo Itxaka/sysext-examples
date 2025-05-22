@@ -2,6 +2,9 @@
 
 source ./shared.sh
 
+# Define service mappings for GitHub Actions workflow
+defineServiceMappings "openbao"
+
 if [ -n "$OPENBAO_VERSION" ];then
   latest_version="$OPENBAO_VERSION"
 else

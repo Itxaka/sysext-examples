@@ -8,7 +8,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**.sh'
+      - 'services/**'
+      - '.github/workflows/build.yaml'
   workflow_dispatch:
+    inputs:
+      specific_sysext:
+        description: 'Specific sysext to build (leave empty for changed ones)'
+        required: false
+        type: string
   schedule:
     - cron: "0 15 * * *"
 
@@ -16,14 +25,115 @@ permissions:
   contents: write
   pull-requests: write
 
-
-
 jobs:
-  bump_version:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.sh
+            services/**
+
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          ALL_SYSEXTS=("k3s" "sbctl" "tailscale" "helm" "k9s" "nebula" "pulumi_esc" "habitat" "incus" "openbao" "alloy" "speedtest" "miniupnpc" "docker" "docker-compose" "falco")
+
+          # If workflow_dispatch with specific_sysext is provided
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.specific_sysext }}" ]]; then
+            MATRIX="{\"item\":[\"${{ github.event.inputs.specific_sysext }}\"]}"
+            echo "Building specific sysext: ${{ github.event.inputs.specific_sysext }}"
+
+          # If scheduled run, build all
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            MATRIX="{\"item\":[\"${ALL_SYSEXTS[*]}\"]}"
+            MATRIX="${MATRIX// /\",\"}"
+            echo "Scheduled run, building all sysexts"
+
+          # If push event, detect changed files
+          else
+            CHANGED_SYSEXTS=()
+
+            # Check shared.sh changes (affects all)
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "shared.sh"; then
+              echo "shared.sh changed, rebuilding all sysexts"
+              MATRIX="{\"item\":[\"${ALL_SYSEXTS[*]}\"]}"
+              MATRIX="${MATRIX// /\",\"}"
+            else
+              # Check specific sysext changes
+              for SYSEXT in "${ALL_SYSEXTS[@]}"; do
+                SYSEXT_FILE="${SYSEXT}.sh"
+                SYSEXT_DIR="${SYSEXT}-*"
+
+                # Replace underscore with hyphen for directory check
+                SYSEXT_DIR_FIXED="${SYSEXT_DIR//_/-}"
+
+                # Check if the sysext script changed
+                if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "$SYSEXT_FILE"; then
+                  CHANGED_SYSEXTS+=("$SYSEXT")
+                  echo "$SYSEXT script changed"
+                  continue
+                fi
+
+                # Check if any associated service files changed
+                SERVICE_PATTERNS=""
+
+                # Try to read service mappings from the script
+                if [[ -f "$SYSEXT_FILE" ]]; then
+                  # Extract service mappings by running the script with a special flag
+                  TEMP_MAPPINGS=$(bash -c "source ./shared.sh && source ./$SYSEXT_FILE --get-service-mappings 2>/dev/null || echo \"\"")
+
+                  # If we got mappings, use them
+                  if [[ -n "$TEMP_MAPPINGS" ]]; then
+                    for SERVICE_NAME in $TEMP_MAPPINGS; do
+                      SERVICE_PATTERNS+=" -e \"services/${SERVICE_NAME}\" -e \"services/${SERVICE_NAME}.\""
+                    done
+                    echo "Using service mappings from $SYSEXT_FILE: $TEMP_MAPPINGS"
+                  else
+                    # Default pattern using sysext name
+                    SERVICE_PATTERNS+=" -e \"services/${SYSEXT}\" -e \"services/${SYSEXT}.\""
+                  fi
+                else
+                  # Default pattern using sysext name
+                  SERVICE_PATTERNS+=" -e \"services/${SYSEXT}\" -e \"services/${SYSEXT}.\""
+                fi
+
+                if [[ -n "$SERVICE_PATTERNS" ]] && echo "${{ steps.changed-files.outputs.all_changed_files }}" | eval "grep -q $SERVICE_PATTERNS"; then
+                  CHANGED_SYSEXTS+=("$SYSEXT")
+                  echo "$SYSEXT service files changed"
+                fi
+              done
+
+              # If no specific sysexts changed, build none (empty matrix)
+              if [ ${#CHANGED_SYSEXTS[@]} -eq 0 ]; then
+                echo "No sysext changes detected"
+                MATRIX="{\"item\":[]}"
+              else
+                MATRIX="{\"item\":[\"${CHANGED_SYSEXTS[*]}\"]}"
+                MATRIX="${MATRIX// /\",\"}"
+                echo "Building changed sysexts: ${CHANGED_SYSEXTS[*]}"
+              fi
+            fi
+          fi
+
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "Matrix: $MATRIX"
+
+  build_sysexts:
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.matrix != '{"item":[]}' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        item: ["k3s", "sbctl", "tailscale", "helm", "k9s", "nebula", "pulumi_esc", "habitat", "incus", "openbao", "alloy", "speedtest", "miniupnpc"]
+      matrix: ${{ fromJson(needs.detect_changes.outputs.matrix) }}
     steps:
       - name: Login to Quay.io
         uses: docker/login-action@v3
@@ -38,4 +148,5 @@ jobs:
           PUSH: true
           KEEP_FILES: false
         run: |
+          echo "Building ${{ matrix.item }}"
           ./${{ matrix.item }}.sh

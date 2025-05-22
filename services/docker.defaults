@@ -1,0 +1,10 @@
+# Docker daemon options
+DOCKER_OPTS=""
+# Docker cgroups options
+DOCKER_CGROUPS=""
+# Docker BIP options
+DOCKER_OPT_BIP=""
+# Docker MTU options
+DOCKER_OPT_MTU=""
+# Docker IP masquerade options
+DOCKER_OPT_IPMASQ=""

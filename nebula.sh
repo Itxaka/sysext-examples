@@ -2,6 +2,9 @@
 
 source ./shared.sh
 
+# Define service mappings for GitHub Actions workflow
+defineServiceMappings "nebula"
+
 if [ -n "$NEBULA_VERSION" ];then
   latest_version="$NEBULA_VERSION"
 else

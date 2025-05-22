@@ -19,8 +19,20 @@ OPENBAO_VERSION=${OPENBAO_VERSION:-}
 ALLOY_VERSION=${ALLOY_VERSION:-}
 SPEEDTEST_VERSION=${SPEEDTEST_VERSION:-}
 MINIUPNPC_VERSION=${MINIUPNPC_VERSION:-}
+DOCKER_VERSION=${DOCKER_VERSION:-}
+DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION:-}
+FALCO_VERSION=${FALCO_VERSION:-}
 HABITAT_CHANNEL=${HABITAT_CHANNEL:-stable}
 
+
+# Check if this is a service mappings query
+if [[ "$1" == "--get-service-mappings" ]]; then
+  # If .service-mappings file exists, output its contents
+  if [[ -f .service-mappings ]]; then
+    cat .service-mappings
+  fi
+  exit 0
+fi
 
 set -e
 
@@ -80,4 +92,15 @@ EOF
       docker push "$REPOSITORY"/"$name":"$docker_version"
   fi
   popd > /dev/null || exit 1
+}
+
+# Function to define service mappings for GitHub Actions workflow
+# This is used to determine which service files are associated with this system extension
+# Usage: defineServiceMappings "service1 service2 service3"
+defineServiceMappings() {
+  local mappings=$1
+
+  # Create a .service-mappings file in the root directory
+  # This file will be read by the GitHub Actions workflow
+  echo "$mappings" > .service-mappings
 }

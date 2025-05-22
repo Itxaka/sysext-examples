@@ -2,6 +2,9 @@
 
 source ./shared.sh
 
+# Define service mappings for GitHub Actions workflow
+defineServiceMappings "tailscaled"
+
 if [ -n "$TAILSCALE_VERSION" ];then
   latest_version="$TAILSCALE_VERSION"
 else

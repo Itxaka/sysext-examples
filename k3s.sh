@@ -4,6 +4,8 @@ set -e
 
 source ./shared.sh
 
+# Define service mappings for GitHub Actions workflow
+defineServiceMappings "k3s k3s-agent"
 
 
 if [ -n "$K3S_VERSION" ];then

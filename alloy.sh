@@ -2,6 +2,9 @@
 
 source ./shared.sh
 
+# Define service mappings for GitHub Actions workflow
+defineServiceMappings "alloy"
+
 if [ -n "$ALLOY_VERSION" ];then
   latest_version="$ALLOY_VERSION"
 else
@@ -43,14 +46,14 @@ curl -fsSL "${SUMS_URL}" -o "$tmpDir/SHA256SUMS"
 # Verify checksum if sha256sum is available
 if command -v sha256sum &> /dev/null; then
   printf "${GREEN}Verifying checksum\n"
-  
+
   # Extract the checksum for the linux-amd64 zip file
   expected_checksum=$(grep "alloy-linux-amd64.zip" "$tmpDir/SHA256SUMS" | awk '{print $1}')
-  
+
   if [ -n "$expected_checksum" ]; then
     # Calculate the actual checksum
     actual_checksum=$(sha256sum "$tmpDir/alloy.zip" | awk '{print $1}')
-    
+
     if [ "$actual_checksum" = "$expected_checksum" ]; then
       printf "${GREEN}Checksum verification successful\n"
     else
