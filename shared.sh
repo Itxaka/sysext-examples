@@ -68,8 +68,36 @@ buildAndPush() {
   if [ ! -d "${dir}/usr/" ]; then
       echo "$dir doesnt look like a sysextension, skipping"
   fi
-  name=$(echo "${dir%/}" | cut -d'-' -f1)
-  version=$(echo "${dir%/}" | cut -d'-' -f2)
+  # Get the full directory name without trailing slash
+  dir_name="${dir%/}"
+
+  # Handle special cases for system extensions with dashes in their names first
+  for sysext in "docker-compose" "pulumi-esc" "pulumi_esc"; do
+    if [[ "$dir_name" == "$sysext-"* ]]; then
+      name="$sysext"
+      version="${dir_name#$sysext-}"
+      break
+    fi
+  done
+
+  # If not a special case, use the standard approach
+  if [ -z "$name" ]; then
+    # Find the position of the last dash
+    last_dash_pos=$(echo "$dir_name" | grep -bo '-' | tail -1 | cut -d':' -f1)
+
+    if [ -n "$last_dash_pos" ]; then
+      # Extract the name (everything before the last dash)
+      name="${dir_name:0:$last_dash_pos}"
+
+      # Extract the version (everything after the last dash)
+      version="${dir_name:$((last_dash_pos+1))}"
+    else
+      # No dash found, use the whole name
+      name="$dir_name"
+      version=""
+    fi
+  fi
+
   if [ -z "$version" ]; then
       version="latest"
   fi
@@ -77,6 +105,13 @@ buildAndPush() {
   docker_version=$(echo "$version" | tr '+' '_')
   # Ensure it's lowercase
   docker_version=$(echo "$docker_version" | tr '[:upper:]' '[:lower:]')
+
+  # Debug output
+  echo "Building image for: $dir"
+  echo "  Name: $name"
+  echo "  Version: $version"
+  echo "  Docker tag: $docker_version"
+
   pushd "$dir" > /dev/null || exit 1
   cat <<EOF > .dockerignore
 Dockerfile
