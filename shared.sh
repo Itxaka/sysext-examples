@@ -22,6 +22,7 @@ MINIUPNPC_VERSION=${MINIUPNPC_VERSION:-}
 DOCKER_VERSION=${DOCKER_VERSION:-}
 DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION:-}
 FALCO_VERSION=${FALCO_VERSION:-}
+LIBRESPEED_CLI_VERSION=${LIBRESPEED_CLI_VERSION:-}
 HABITAT_CHANNEL=${HABITAT_CHANNEL:-stable}
 
 
@@ -72,7 +73,7 @@ buildAndPush() {
   dir_name="${dir%/}"
 
   # Handle special cases for system extensions with dashes in their names first
-  for sysext in "docker-compose" "pulumi-esc" "pulumi_esc"; do
+  for sysext in "docker-compose" "pulumi-esc" "pulumi_esc" "librespeed-cli"; do
     if [[ "$dir_name" == "$sysext-"* ]]; then
       name="$sysext"
       version="${dir_name#$sysext-}"
