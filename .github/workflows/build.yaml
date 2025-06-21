@@ -46,7 +46,7 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          ALL_SYSEXTS=("k3s" "sbctl" "tailscale" "helm" "k9s" "nebula" "pulumi_esc" "habitat" "incus" "openbao" "alloy" "speedtest" "miniupnpc" "docker" "docker-compose" "falco" "librespeed-cli")
+          ALL_SYSEXTS=("k3s" "sbctl" "tailscale" "helm" "k9s" "nebula" "pulumi_esc" "habitat" "incus" "openbao" "alloy" "speedtest" "miniupnpc" "docker" "docker-compose" "falco" "librespeed-cli" "sysbox")
 
           # If workflow_dispatch with specific_sysext is provided
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.specific_sysext }}" ]]; then
@@ -142,6 +142,16 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
       - uses: actions/checkout@v4
+      - name: Set up Go
+        if: matrix.item == 'sysbox'
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.6'
+      - name: Install build dependencies
+        if: matrix.item == 'sysbox'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential protobuf-compiler pkg-config libseccomp-dev
       - name: Run updater script for ${{ matrix.item }}
         env:
           REPOSITORY: ${{ format('{0}/{1}', secrets.OCI_REGISTRY || 'quay.io', secrets.OCI_REGISTRY_NAME || 'itxaka') }}
