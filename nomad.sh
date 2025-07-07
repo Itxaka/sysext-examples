@@ -83,7 +83,7 @@ unzip -q "$tmpDir/nomad_${version_no_v}_linux_amd64.zip" -d "$tmpDir"
 mv "$tmpDir"/nomad usr/local/bin/
 chmod +x usr/local/bin/nomad
 
-# Clean up
+# Clean up temp
 rm -Rf "$tmpDir"
 
 # Copy service files
