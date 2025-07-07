@@ -1,0 +1,27 @@
+[Unit]
+Description=Nomad Client
+Documentation=https://www.nomadproject.io/
+Requires=network-online.target
+After=network-online.target
+ConditionFileNotEmpty=/oem/nomad/client.hcl
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=notify
+User=nomad
+Group=nomad
+EnvironmentFile=-/oem/nomad/.env
+ExecStart=/usr/local/bin/nomad agent -config=/oem/nomad/client.hcl
+ExecReload=/bin/kill -HUP \$MAINPID
+KillMode=process
+KillSignal=SIGINT
+Restart=on-failure
+LimitNOFILE=65536
+LimitNPROC=infinity
+RestartSec=5
+TasksMax=infinity
+OOMScoreAdjust=-1000
+
+[Install]
+WantedBy=multi-user.target
