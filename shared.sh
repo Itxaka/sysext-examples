@@ -6,6 +6,8 @@ REPOSITORY=${REPOSITORY:-"ttl.sh"}
 PUSH=${PUSH:-"false"}
 KEEP_FILES=${KEEP_FILES:-"true"}
 FORCE=${FORCE:-false}
+SKIP_VERIFY=${SKIP_VERIFY:-false}
+SKIP_DEPS=${SKIP_DEPS:-false}
 K3S_VERSION=${K3S_VERSION:-}
 SBCTL_VERSION=${SBCTL_VERSION:-}
 TAILSCALE_VERSION=${TAILSCALE_VERSION:-}
@@ -14,8 +16,27 @@ HELM_VERSION=${HELM_VERSION:-}
 K9S_VERSION=${K9S_VERSION:-}
 HABITAT_VERSION=${HABITAT_VERSION:-}
 PULUMI_ESC_VERSION=${PULUMI_ESC_VERSION:-}
+OPENBAO_VERSION=${OPENBAO_VERSION:-}
+ALLOY_VERSION=${ALLOY_VERSION:-}
+SPEEDTEST_VERSION=${SPEEDTEST_VERSION:-}
+MINIUPNPC_VERSION=${MINIUPNPC_VERSION:-}
+DOCKER_VERSION=${DOCKER_VERSION:-}
+DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION:-}
+FALCO_VERSION=${FALCO_VERSION:-}
+LIBRESPEED_CLI_VERSION=${LIBRESPEED_CLI_VERSION:-}
+SYSBOX_VERSION=${SYSBOX_VERSION:-}
+NOMAD_VERSION=${NOMAD_VERSION:-}
 HABITAT_CHANNEL=${HABITAT_CHANNEL:-stable}
 
+
+# Check if this is a service mappings query
+if [[ "$1" == "--get-service-mappings" ]]; then
+  # If .service-mappings file exists, output its contents
+  if [[ -f .service-mappings ]]; then
+    cat .service-mappings
+  fi
+  exit 0
+fi
 
 set -e
 
@@ -51,8 +72,36 @@ buildAndPush() {
   if [ ! -d "${dir}/usr/" ]; then
       echo "$dir doesnt look like a sysextension, skipping"
   fi
-  name=$(echo "${dir%/}" | cut -d'-' -f1)
-  version=$(echo "${dir%/}" | cut -d'-' -f2)
+  # Get the full directory name without trailing slash
+  dir_name="${dir%/}"
+
+  # Handle special cases for system extensions with dashes in their names first
+  for sysext in "docker-compose" "pulumi-esc" "pulumi_esc" "librespeed-cli"; do
+    if [[ "$dir_name" == "$sysext-"* ]]; then
+      name="$sysext"
+      version="${dir_name#$sysext-}"
+      break
+    fi
+  done
+
+  # If not a special case, use the standard approach
+  if [ -z "$name" ]; then
+    # Find the position of the last dash
+    last_dash_pos=$(echo "$dir_name" | grep -bo '-' | tail -1 | cut -d':' -f1)
+
+    if [ -n "$last_dash_pos" ]; then
+      # Extract the name (everything before the last dash)
+      name="${dir_name:0:$last_dash_pos}"
+
+      # Extract the version (everything after the last dash)
+      version="${dir_name:$((last_dash_pos+1))}"
+    else
+      # No dash found, use the whole name
+      name="$dir_name"
+      version=""
+    fi
+  fi
+
   if [ -z "$version" ]; then
       version="latest"
   fi
@@ -60,6 +109,13 @@ buildAndPush() {
   docker_version=$(echo "$version" | tr '+' '_')
   # Ensure it's lowercase
   docker_version=$(echo "$docker_version" | tr '[:upper:]' '[:lower:]')
+
+  # Debug output
+  echo "Building image for: $dir"
+  echo "  Name: $name"
+  echo "  Version: $version"
+  echo "  Docker tag: $docker_version"
+
   pushd "$dir" > /dev/null || exit 1
   cat <<EOF > .dockerignore
 Dockerfile
@@ -75,4 +131,15 @@ EOF
       docker push "$REPOSITORY"/"$name":"$docker_version"
   fi
   popd > /dev/null || exit 1
+}
+
+# Function to define service mappings for GitHub Actions workflow
+# This is used to determine which service files are associated with this system extension
+# Usage: defineServiceMappings "service1 service2 service3"
+defineServiceMappings() {
+  local mappings=$1
+
+  # Create a .service-mappings file in the root directory
+  # This file will be read by the GitHub Actions workflow
+  echo "$mappings" > .service-mappings
 }

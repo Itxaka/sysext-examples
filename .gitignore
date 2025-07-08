@@ -1,0 +1,68 @@
+# Build outputs and intermediate files/folders
+# System extension directories
+*-v*/
+*-[0-9]*.[0-9]*/
+*-[0-9]*.[0-9]*.[0-9]*/
+*-[0-9]*.[0-9]*.[0-9]*+*/
+incus-*/
+nebula-*/
+tailscale-*/
+openbao-*/
+k3s-*/
+sbctl-*/
+habitat-*/
+pulumi_esc-*/
+helm-*/
+k9s-*/
+
+# System extension raw files
+*.sysext.raw
+
+# Temporary files
+*.tmp
+tmp/
+.tmp/
+
+# Log files
+*.log
+logs/
+.logs/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Downloaded artifacts
+*.tar.gz
+*.tar.gz.sig
+*.zip
+*.deb
+*.rpm
+*.bin
+*.exe
+*.msi
+
+# Binary files
+bao
+nebula
+tailscale
+tailscaled
+k3s
+sbctl
+habitat
+pulumi
+helm
+k9s
+incus
+
+# Docker-related files
+.dockerignore
+Dockerfile.tmp
+.docker/

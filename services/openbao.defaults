@@ -1,0 +1,9 @@
+# OpenBao server configuration
+# This file contains environment variables for the OpenBao service
+# For more configuration options, create a config.hcl file in /etc/openbao/
+
+# Set the address to listen on for client requests
+# OPENBAO_ADDR="127.0.0.1:8200"
+
+# Set the address to listen on for cluster server-to-server requests
+# OPENBAO_CLUSTER_ADDR="127.0.0.1:8201"

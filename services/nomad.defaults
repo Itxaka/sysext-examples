@@ -1,0 +1,21 @@
+# Nomad configuration
+# This file contains environment variables for the Nomad service
+# For more configuration options, create configuration files in /oem/nomad/
+
+# Set the datacenter name
+# NOMAD_DATACENTER="dc1"
+
+# Set the region name
+# NOMAD_REGION="global"
+
+# Set the bind address for client and server communication
+# NOMAD_BIND_ADDR="0.0.0.0"
+
+# Set the advertise address for client and server communication
+# NOMAD_ADVERTISE_ADDR="127.0.0.1"
+
+# Set the log level (TRACE, DEBUG, INFO, WARN, ERROR)
+# NOMAD_LOG_LEVEL="INFO"
+
+# Set the log format (standard, json)
+# NOMAD_LOG_FORMAT="standard"

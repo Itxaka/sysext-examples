@@ -1,0 +1,22 @@
+[Unit]
+Description=OpenBao secrets agent service
+Documentation=https://openbao.org/docs/
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/openbao
+ExecStart=/usr/local/sbin/bao agent -config=/etc/openbao.d/host.hcl
+ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
