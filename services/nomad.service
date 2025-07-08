@@ -13,7 +13,7 @@ User=nomad
 Group=nomad
 EnvironmentFile=-/oem/nomad/.env
 ExecStart=/usr/local/bin/nomad agent -config=/oem/nomad/client.hcl
-ExecReload=/bin/kill -HUP \$MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT
 Restart=on-failure
