@@ -9,6 +9,7 @@ FORCE=${FORCE:-false}
 SKIP_VERIFY=${SKIP_VERIFY:-false}
 SKIP_DEPS=${SKIP_DEPS:-false}
 K3S_VERSION=${K3S_VERSION:-}
+K0S_VERSION=${K0S_VERSION:-}
 SBCTL_VERSION=${SBCTL_VERSION:-}
 TAILSCALE_VERSION=${TAILSCALE_VERSION:-}
 NEBULA_VERSION=${NEBULA_VERSION:-}
@@ -56,9 +57,14 @@ createDirs() {
 createExtensionRelease() {
   local name=$1
   local RELOAD=$2
+  local arch="x86_64"
+
+  if [ "$(uname -m)" = "aarch64" ]; then
+    arch="arm64"
+  fi
 
   printf "${GREEN}Creating extension.release.%s file with reload: %s\n" "${name}" "${RELOAD}"
-  printf "ID=_any\nARCHITECTURE=x86-64\n" > usr/lib/extension-release.d/extension-release."${name}"
+  printf "ID=_any\nARCHITECTURE=%s\n" ${arch} > usr/lib/extension-release.d/extension-release."${name}"
   if [ "$RELOAD" == "true" ]; then
     printf "EXTENSION_RELOAD_MANAGER=1\n" >> usr/lib/extension-release.d/extension-release."${name}"
   fi
