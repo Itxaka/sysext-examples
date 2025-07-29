@@ -157,6 +157,7 @@ mkdir -p usr/local/lib/systemd/system/multi-user.target.d
 mkdir -p usr/local/share/doc/sysbox
 mkdir -p usr/local/etc/sysctl.d
 mkdir -p usr/local/lib/modules-load.d
+popd || exit 1
 
 # Clone and build Sysbox from source
 printf "${GREEN}Cloning and building Sysbox\n"
@@ -169,12 +170,12 @@ mkdir -p "$GOPATH" "$GOCACHE"
 
 # Clone the repository directly into the sysext directory
 printf "${GREEN}Cloning Sysbox repository\n"
-pushd "$sysext_name" > /dev/null || exit 1
+pushd sysbox-"$latest_version" > /dev/null || exit 1
 if ! git clone --recursive --branch "v${latest_version}" https://github.com/nestybox/sysbox.git build; then
   printf "${RED}Failed to clone Sysbox repository\n"
   exit 1
 fi
-cd build || exit 1
+pushd build || exit 1
 
 # Build Sysbox components using the simple build targets
 printf "${GREEN}Building Sysbox components (this may take several minutes)\n"
@@ -222,7 +223,7 @@ cp "sysbox-runc/build/${arch}/sysbox-runc" "../usr/local/bin/" || {
 }
 
 # Go back to the sysext directory
-cd .. || exit 1
+popd || exit 1
 
 # Create the main sysbox wrapper script
 cat > "usr/local/bin/sysbox" << 'EOF'
@@ -308,7 +309,9 @@ defineServiceMappings "sysbox.service sysbox-fs.service sysbox-mgr.service"
 printf "${GREEN}Creating extension release\n"
 createExtensionRelease sysbox-"$latest_version" true
 find . -type d -empty -delete
-popd > /dev/null || exit 1
+
+# go back to the root dir
+popd || exit 1
 
 if [ "${PUSH}" != false ]; then
   buildAndPush sysbox-"$latest_version"
