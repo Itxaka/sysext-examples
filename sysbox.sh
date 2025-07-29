@@ -197,17 +197,23 @@ if ! make sysbox-mgr-static; then
   exit 1
 fi
 
+arch="amd64"
+
+if [ "$(uname -m)" = "aarch64" ]; then
+  arch="arm64"
+fi
+
 # Copy binaries to the system extension directory
 printf "${GREEN}Copying binaries to system extension\n"
-cp "sysbox-fs/build/amd64/sysbox-fs" "../usr/local/bin/" || {
+cp "sysbox-fs/build/${arch}/sysbox-fs" "../usr/local/bin/" || {
   printf "${RED}Failed to copy sysbox-fs binary\n"
   exit 1
 }
-cp "sysbox-mgr/build/amd64/sysbox-mgr" "../usr/local/bin/" || {
+cp "sysbox-mgr/build/${arch}/sysbox-mgr" "../usr/local/bin/" || {
   printf "${RED}Failed to copy sysbox-mgr binary\n"
   exit 1
 }
-cp "sysbox-runc/build/amd64/sysbox-runc" "../usr/local/bin/" || {
+cp "sysbox-runc/build/${arch}/sysbox-runc" "../usr/local/bin/" || {
   printf "${RED}Failed to copy sysbox-runc binary\n"
   exit 1
 }
