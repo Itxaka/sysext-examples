@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Enable debug directly
-set -e
+set -x
 
 source ./shared.sh
 
