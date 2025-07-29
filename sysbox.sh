@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Enable debug directly
-set -x
-
 source ./shared.sh
 
 # Install Go if not available
