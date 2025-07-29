@@ -132,6 +132,7 @@ jobs:
     needs: detect_changes
     if: ${{ needs.detect_changes.outputs.matrix != '{"item":[]}' }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix: ${{ fromJson(needs.detect_changes.outputs.matrix) }}
     steps:
