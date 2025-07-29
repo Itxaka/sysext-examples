@@ -52,7 +52,12 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.specific_sysext }}" ]]; then
             MATRIX="{\"item\":[\"${{ github.event.inputs.specific_sysext }}\"]}"
             echo "Building specific sysext: ${{ github.event.inputs.specific_sysext }}"
-
+          
+          # If workflow dispatch with value set to all, build all
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.specific_sysext }}" == "all" ]]; then 
+            MATRIX="{\"item\":[\"${ALL_SYSEXTS[*]}\"]}"
+            MATRIX="${MATRIX// /\",\"}"
+            echo "Building all sysexts"
           # If scheduled run, build all
           elif [[ "${{ github.event_name }}" == "schedule" ]]; then
             MATRIX="{\"item\":[\"${ALL_SYSEXTS[*]}\"]}"
