@@ -49,7 +49,7 @@ jobs:
           ALL_SYSEXTS=("k3s" "sbctl" "tailscale" "helm" "k9s" "nebula" "pulumi_esc" "habitat" "incus" "openbao" "alloy" "speedtest" "miniupnpc" "docker" "docker-compose" "falco" "librespeed-cli" "sysbox" "nomad")
 
           # If workflow_dispatch with specific_sysext is provided
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.specific_sysext }}" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.specific_sysext }}" && "${{ github.event.inputs.specific_sysext }}" != "all" ]]; then
             MATRIX="{\"item\":[\"${{ github.event.inputs.specific_sysext }}\"]}"
             echo "Building specific sysext: ${{ github.event.inputs.specific_sysext }}"
           
