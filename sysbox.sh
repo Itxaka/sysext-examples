@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Enable debug directly
+set -euo pipefail
+
 source ./shared.sh
 
 # Install Go if not available
