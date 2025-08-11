@@ -31,7 +31,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -147,7 +147,7 @@ jobs:
           registry:  ${{ secrets.OCI_REGISTRY || 'quay.io' }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_ROBOT_TOKEN }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Go
         if: matrix.item == 'sysbox'
         uses: actions/setup-go@v5
