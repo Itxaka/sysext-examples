@@ -142,7 +142,7 @@ jobs:
       matrix: ${{ fromJson(needs.detect_changes.outputs.matrix) }}
     steps:
       - name: Login to Quay.io
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry:  ${{ secrets.OCI_REGISTRY || 'quay.io' }}
           username: ${{ secrets.QUAY_USERNAME }}
